@@ -44,8 +44,8 @@ lightning:
 data:
   target: train.SpectrogramDataModuleFromConfig
   params:
-    batch_size: 3
-    num_workers: 8
+    batch_size: 4
+    num_workers: 4
 
     spec_dir_path: './data/vggsound/melspec_10s_22050hz'
     sample_rate: 22050

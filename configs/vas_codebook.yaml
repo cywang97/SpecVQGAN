@@ -44,7 +44,7 @@ lightning:
 data:
   target: train.SpectrogramDataModuleFromConfig
   params:
-    batch_size: 3
+    batch_size: 4
     num_workers: 8
 
     spec_dir_path: './data/vas/features/*/melspec_10s_22050hz'

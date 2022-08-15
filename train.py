@@ -114,6 +114,11 @@ def get_parser(**parser_kwargs):
         default='',
         help='post-postfix for default name',
     )
+    parser.add_argument(
+        '--logdir',
+        type=str,
+        default=''
+    )
 
     return parser
 
@@ -590,7 +595,7 @@ if __name__ == '__main__':
         else:
             name = ''
         nowname = now+name+opt.postfix
-        logdir = os.path.join('logs', nowname)
+        logdir = os.path.join(opt.logdir, nowname)
 
     print(nowname)
     ckptdir = os.path.join(logdir, 'checkpoints')

@@ -5,6 +5,7 @@ import importlib
 import os
 import signal
 import sys
+import pdb
 from pathlib import Path
 
 import librosa
@@ -488,7 +489,7 @@ class ImageLogger(Callback):
                     self._log_rec_audio(images[k], tag, pl_module.global_step, save_rec_path=path)
 
     def log_img(self, pl_module, batch, batch_idx, split='train'):
-        if (self.check_frequency(batch_idx) and  # batch_idx % self.batch_freq == 0
+        if  (batch_idx == 0 and
                 hasattr(pl_module, 'log_images') and
                 callable(pl_module.log_images) and
                 self.max_images > 0 and
@@ -535,8 +536,8 @@ class ImageLogger(Callback):
             return True
         return False
 
-    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
-        self.log_img(pl_module, batch, batch_idx, split='train')
+    #def on_train_epoch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
+    #    self.log_img(pl_module, batch, batch_idx, split='train')
 
     def on_validation_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         self.log_img(pl_module, batch, batch_idx, split='val')
@@ -584,7 +585,7 @@ if __name__ == '__main__':
         base_configs = sorted(glob.glob(os.path.join(logdir, 'configs/*.yaml')))
         opt.base = base_configs+opt.base
         _tmp = logdir.split('/')
-        nowname = _tmp[_tmp.index('logs')+1]
+        nowname = _tmp[-1]
     else:
         if opt.name:
             name = '_'+opt.name
@@ -682,9 +683,10 @@ if __name__ == '__main__':
             'image_logger': {
                 'target': 'train.ImageLogger',
                 'params': {
-                    'batch_frequency': 750,
+                    'batch_frequency': 200,
                     'max_images': 4,
-                    'clamp': True
+                    'clamp': True,
+                    'increase_log_steps': False
                 }
             },
             'learning_rate_logger': {

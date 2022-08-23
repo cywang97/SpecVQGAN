@@ -485,7 +485,7 @@ class Encoder(nn.Module):
                 if len(self.down[i_level].attn) > 0:
                     h = self.down[i_level].attn[i_block](h)
                 hs.append(h)
-            if i_level != self.num_resolutions-1:
+            if hasattr(self.down[i_level], 'downsample'):
                 hs.append(self.down[i_level].downsample(hs[-1]))
 
         # middle
@@ -537,12 +537,12 @@ class Encoder1d(Encoder):
                                            temb_channels=self.temb_ch,
                                            dropout=dropout))
                 block_in = block_out
-                if curr_res in attn_resolutions:
+                if i_level == self.num_resolutions - 1:
                     attn.append(AttnBlock1d(block_in))
             down = nn.Module()
             down.block = block
             down.attn = attn
-            if i_level != self.num_resolutions-1:
+            if i_level == self.num_resolutions - 1:
                 down.downsample = Downsample1d(block_in, resamp_with_conv)
                 curr_res = curr_res // 2
             self.down.append(down)
@@ -659,7 +659,7 @@ class Decoder(nn.Module):
                 h = self.up[i_level].block[i_block](h, temb)
                 if len(self.up[i_level].attn) > 0:
                     h = self.up[i_level].attn[i_block](h)
-            if i_level != 0:
+            if hasattr(self.up[i_level], 'upsample'):
                 h = self.up[i_level].upsample(h)
 
         # end
@@ -717,12 +717,12 @@ class Decoder1d(Decoder):
                 block.append(ResnetBlock1d(in_channels=block_in, out_channels=block_out,
                                            temb_channels=self.temb_ch, dropout=dropout))
                 block_in = block_out
-                if curr_res in attn_resolutions:
+                if i_level == 0:
                     attn.append(AttnBlock1d(block_in))
             up = nn.Module()
             up.block = block
             up.attn = attn
-            if i_level != 0:
+            if i_level == 0:
                 up.upsample = Upsample1d(block_in, resamp_with_conv)
                 curr_res = curr_res * 2
             self.up.insert(0, up)  # prepend to get consistent order

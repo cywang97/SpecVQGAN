@@ -35,8 +35,6 @@ class Net2NetTransformer(pl.LightningModule):
             cond_stage_permuter_config = {"target": "specvqgan.modules.transformer.permuter.Identity"}
         self.first_stage_permuter = instantiate_from_config(config=first_stage_permuter_config)
         self.cond_stage_permuter = instantiate_from_config(config=cond_stage_permuter_config)
-        if cond_stage_key == 'class':
-            self.class_embedding = torch.nn.Embedding(transformer_config.n_class, transformer_config.params.feat_embedding_config.params.in_channels)
         self.transformer = instantiate_from_config(config=transformer_config)
 
         if ckpt_path is not None:
@@ -310,9 +308,6 @@ class Net2NetTransformer(pl.LightningModule):
             # if batch[key] is 1D; else the batch[key] is 2D
             if key in ['feature', 'target']:
                 x = self.cond_stage_model.get_input(batch, key)
-            elif key == 'class':
-                x = self.class_embedding(batch['class'].cuda())
-                x = x[..., None]
             else:
                 x = batch[key]
                 if len(x.shape) == 3:

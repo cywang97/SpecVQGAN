@@ -335,15 +335,12 @@ class VASSpecsCondOnClass(torch.utils.data.Dataset):
 
     def __init__(self, split, specs_dataset_cfg, condition_dataset_cfg):
         self.specs_dataset_cfg = specs_dataset_cfg
-        self.class_dict = {'baby': 0, 'cough': 1, 'dog': 2, 'drum': 3, 'fireworks': 4, 'gun': 5, 'hammer': 6, 'sneeze': 7}
         # not used anywhere else. Kept for compatibility
         self.condition_dataset_cfg = condition_dataset_cfg
         self.specs_dataset = VASSpecs(split, **specs_dataset_cfg)
 
     def __getitem__(self, idx):
         specs_item = self.specs_dataset[idx]
-        class_label = self.class_dict[specs_item['label']]
-        specs_item['class'] = class_label
         return specs_item
 
     def __len__(self):

@@ -1,5 +1,5 @@
 model:
-  base_learning_rate: 1e-6
+  base_learning_rate: 5e-6
   target: specvqgan.models.cond_transformer.Net2NetTransformer
   params:
     cond_stage_key: target
@@ -12,12 +12,11 @@ model:
             num_embeddings: 309
             embedding_dim: 1024
         GPT_config:
-          vocab_size: 128
-          block_size: 477  # 53*5 + 212
+          vocab_size: 1024
+          block_size: 266  # 53*5 + how many frames (1)
           n_layer: 24
           n_head: 16
           n_embd: 1024
-          
     first_stage_permuter_config:
       target: specvqgan.modules.transformer.permuter.ColumnMajor
       params:
@@ -26,9 +25,9 @@ model:
     first_stage_config:
       target: specvqgan.models.vqgan.VQModel
       params:
-        ckpt_path:  /modelblob/users/v-chengw/models/specvqgan/2022-08-15T15-03-10_vas_codebook/checkpoints/last.ckpt # e.g. '2021-06-06T19-42-53_vas_specs_vqgan' or '2021-05-19T22-16-54_vggsound_specs_vqgan'
+        ckpt_path: 'Replace the first_stage ckpt path' # e.g. '2021-05-19T22-16-54_vggsound_codebook'
         embed_dim: 256
-        n_embed: 128
+        n_embed: 1024
         ddconfig:
           double_z: false
           z_channels: 256
@@ -72,33 +71,35 @@ lightning:
         verbose: True
 
 
-
 data:
   target: train.ConditionedSpectrogramDataModuleFromConfig
   params:
-    batch_size: 8
-    num_workers: 4
+    replace_feats_with_random: true
+    batch_size: 4
+    num_workers: 0
 
-    spec_dir_path: '/datablob/users/v-chengw/data/specvqgan/downloaded_features/vas/*/melspec_10s_22050hz'
+    spec_dir_path: './data/vggsound/melspec_10s_22050hz'
     sample_rate: 22050
     mel_num: 80
     spec_len: 860
     spec_crop_len: 848
     random_crop: False
 
-    
-
     train:
-      target: specvqgan.data.vas.VASSpecsCondOnClassTrain
+      target: specvqgan.data.vggsound.VGGSoundSpecsCondOnClassTrain
       params:
         specs_dataset_cfg:
-          split_path: './data/vas_train.txt'
         condition_dataset_cfg:
-          split_path: './data/vas_train.txt'
+          split_path: './data/vggsound_train.txt'
     validation:
-      target: specvqgan.data.vas.VASSpecsCondOnClassValidation
+      target: specvqgan.data.vggsound.VGGSoundSpecsCondOnClassValidation
       params:
         specs_dataset_cfg:
-          split_path: './data/vas_valid.txt'
         condition_dataset_cfg:
-          split_path: './data/vas_valid.txt'
+          split_path: './data/vggsound_valid.txt'
+    test:
+      target: specvqgan.data.vggsound.VGGSoundSpecsCondOnClassTest
+      params:
+        specs_dataset_cfg:
+        condition_dataset_cfg:
+          split_path: './data/vggsound_test.txt'
